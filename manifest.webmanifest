@@ -1,0 +1,16 @@
+{
+  "id": "./",
+  "name": "CubeScramble — 3x3 Rubik's Cube",
+  "short_name": "CubeScramble",
+  "description": "3x3 Rubik kubu üçün scramble generator və speedcubing timer.",
+  "lang": "az",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#10131b",
+  "theme_color": "#10131b",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
