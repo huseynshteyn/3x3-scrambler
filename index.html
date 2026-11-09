@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="az">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10131b">
+  <meta name="description" content="3x3 Rubik kubu üçün scramble generator və speedcubing timer. Offline işləyir, telefona quraşdırıla bilər.">
+  <title>CubeScramble — 3×3</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icon.svg">
+  <style>
+    :root{color-scheme:dark;--bg:#10131b;--panel:#191e29;--panel2:#202736;--text:#f4f6fb;--muted:#98a3b7;--line:#2c3546;--accent:#9b8cff;--accent2:#71e0bd;--danger:#ff7185}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -20%,#29304b 0,transparent 55%),var(--bg);color:var(--text);font:16px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+    button,select{font:inherit}button{cursor:pointer}.app{width:min(760px,100%);margin:auto;padding:24px 18px calc(28px + env(safe-area-inset-bottom))}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}.brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:.2px}.brand img{width:38px;height:38px}.brand span{font-size:19px}.top-actions{display:flex;gap:8px}
+    .icon-btn,.secondary,.primary{border:1px solid var(--line);border-radius:13px;background:var(--panel);color:var(--text);padding:10px 14px}.icon-btn{width:42px;height:42px;padding:0;display:grid;place-items:center;font-size:18px}.primary{background:var(--accent);border-color:transparent;color:#171327;font-weight:800}.primary:active,.secondary:active,.icon-btn:active{transform:scale(.98)}
+    .card{background:linear-gradient(145deg,rgba(31,38,53,.96),rgba(23,28,40,.96));border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:0 18px 50px #0002}
+    .eyebrow{color:var(--muted);font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}.scramble-card{margin-bottom:16px}.scramble-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.scramble{font-size:clamp(20px,4.5vw,29px);line-height:1.65;font-weight:750;letter-spacing:.7px;overflow-wrap:anywhere;min-height:96px;padding:15px 0 18px;font-variant-numeric:tabular-nums}.scramble-actions{display:flex;gap:9px;flex-wrap:wrap}.scramble-actions button{flex:1}
+    .timer-card{text-align:center;padding:26px 18px 22px}.timer{font-size:clamp(64px,16vw,104px);font-weight:800;letter-spacing:-5px;font-variant-numeric:tabular-nums;line-height:1.25;margin:14px 0 8px;user-select:none}.timer.running{color:var(--accent2)}.timer-hint{color:var(--muted);font-size:13px}.timer-controls{display:flex;justify-content:center;gap:10px;margin-top:18px}.timer-controls button{min-width:120px}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}.stat{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center}.stat strong{display:block;font-size:23px;font-variant-numeric:tabular-nums}.stat span{font-size:11px;color:var(--muted);font-weight:750;letter-spacing:1px}
+    .history-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.history{display:grid;gap:8px}.solve{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:11px 14px}.solve time{font-weight:800;font-variant-numeric:tabular-nums}.solve small{color:var(--muted);font-size:11px}.empty{color:var(--muted);text-align:center;padding:20px 8px}
+    .settings{display:flex;align-items:center;gap:10px}.settings label{color:var(--muted);font-size:13px}.settings select{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px}
+    footer{text-align:center;color:var(--muted);font-size:12px;padding:22px 0 4px}.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#f4f6fb;color:#151925;padding:10px 16px;border-radius:999px;font-weight:700;font-size:13px;transition:.2s;box-shadow:0 8px 30px #0005}.toast.show{opacity:1;transform:translate(-50%,0)}
+    @media(max-width:480px){.app{padding:16px 13px calc(22px + env(safe-area-inset-bottom))}.card{padding:18px;border-radius:18px}.timer-card{padding:22px 12px}.stats{gap:7px}.stat{padding:11px 5px}.stat strong{font-size:20px}.scramble{min-height:112px}.timer-controls button{min-width:0;flex:1}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="brand"><img src="./icon.svg" alt=""><span>CubeScramble</span></div>
+      <div class="top-actions"><button class="icon-btn" id="installBtn" aria-label="Install et" title="Telefona quraşdır">↓</button></div>
+    </header>
+
+    <section class="card scramble-card" aria-labelledby="scrambleTitle">
+      <div class="scramble-head">
+        <div><div class="eyebrow" id="scrambleTitle">3×3 scramble</div><div class="settings"><label for="moveCount">Hərəkət sayı</label><select id="moveCount"><option value="20">20</option><option value="25">25</option><option value="30">30</option></select></div></div>
+        <span class="eyebrow" id="scrambleNumber">#1</span>
+      </div>
+      <div class="scramble" id="scramble" aria-live="polite">R U R' U' F2 D L2 B U2 R' F D2 L' U B2 R2 D' F' U2 L</div>
+      <div class="scramble-actions"><button class="primary" id="newScramble">↻ Yeni scramble</button><button class="secondary" id="copyScramble">Kopyala</button></div>
+    </section>
+
+    <section class="card timer-card" aria-label="Speedcubing timer">
+      <div class="eyebrow">Speed timer</div>
+      <div class="timer" id="timer" role="timer" aria-live="off">0.00</div>
+      <div class="timer-hint" id="timerHint">Başlamaq üçün boşluq (Space) düyməsini saxla</div>
+      <div class="timer-controls"><button class="primary" id="timerBtn">Başla</button><button class="secondary" id="resetBtn">Sıfırla</button></div>
+    </section>
+
+    <section class="stats" aria-label="Statistika">
+      <div class="stat"><strong id="solveCount">0</strong><span>SOLVE</span></div>
+      <div class="stat"><strong id="bestTime">—</strong><span>BEST</span></div>
+      <div class="stat"><strong id="ao5">—</strong><span>AO5</span></div>
+    </section>
+
+    <section>
+      <div class="history-head"><div class="eyebrow">Son nəticələr</div><button class="secondary" id="clearHistory" style="padding:7px 11px;font-size:12px">Təmizlə</button></div>
+      <div class="history" id="history"><div class="empty">Hələ solve yoxdur. İlk solve-unu et!</div></div>
+    </section>
+    <footer>Offline işləyir · Nəticələr bu cihazda saxlanılır</footer>
+  </main>
+  <div class="toast" id="toast" role="status"></div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const faces = ['R','L','U','D','F','B'];
+  const suffixes = ['', "'", '2'];
+  let scrambleIndex = 1, startAt = 0, elapsed = 0, raf = 0;
+  let mode = 'idle', holdTimer = null, ready = false, installPrompt = null;
+  let solves = [];
+  try { solves = JSON.parse(localStorage.getItem('cube-solves') || '[]').filter(x => Number.isFinite(x.ms)); } catch {}
+
+  function makeScramble(n) {
+    const result = []; let previous = '';
+    while (result.length < n) {
+      const face = faces[Math.floor(Math.random() * faces.length)];
+      if (face === previous) continue;
+      result.push(face + suffixes[Math.floor(Math.random() * suffixes.length)]);
+      previous = face;
+    }
+    return result.join(' ');
+  }
+  function nextScramble() {
+    $('scramble').textContent = makeScramble(Number($('moveCount').value));
+    $('scrambleNumber').textContent = '#' + (++scrambleIndex);
+  }
+  function format(ms) {
+    const centis = Math.floor(ms / 10);
+    const minutes = Math.floor(centis / 6000);
+    const seconds = Math.floor(centis / 100) % 60;
+    const hundredths = centis % 100;
+    return minutes ? minutes + ':' + String(seconds).padStart(2,'0') + '.' + String(hundredths).padStart(2,'0') : seconds + '.' + String(hundredths).padStart(2,'0');
+  }
+  function renderTimer() { $('timer').textContent = format(elapsed); }
+  function tick() { elapsed = performance.now() - startAt; renderTimer(); raf = requestAnimationFrame(tick); }
+  function start() { if (mode === 'running') return; mode = 'running'; startAt = performance.now(); $('timer').classList.add('running'); $('timerHint').textContent = 'Space və ya düymə ilə dayandır'; raf = requestAnimationFrame(tick); $('timerBtn').textContent = 'Dayandır'; }
+  function stop() {
+    if (mode !== 'running') return;
+    cancelAnimationFrame(raf); elapsed = performance.now() - startAt; mode = 'idle'; $('timer').classList.remove('running'); renderTimer();
+    solves.unshift({ms:Math.round(elapsed), date:Date.now(), scramble:$('scramble').textContent});
+    solves = solves.slice(0,100); save(); renderHistory(); nextScramble();
+    $('timerHint').textContent = 'Əla! Növbəti solve üçün hazırlaş'; $('timerBtn').textContent = 'Yenidən başla';
+  }
+  function reset() { if (mode === 'running') cancelAnimationFrame(raf); mode = 'idle'; elapsed = 0; renderTimer(); $('timer').classList.remove('running'); $('timerHint').textContent = 'Başlamaq üçün boşluq (Space) düyməsini saxla'; $('timerBtn').textContent = 'Başla'; }
+  function save() { try { localStorage.setItem('cube-solves', JSON.stringify(solves)); } catch {} }
+  function average5() {
+    if (solves.length < 5) return '—';
+    const five = solves.slice(0,5).map(x => x.ms).sort((a,b)=>a-b);
+    return format(Math.round(five.slice(1,4).reduce((a,b)=>a+b,0)/3));
+  }
+  function renderHistory() {
+    $('solveCount').textContent = solves.length;
+    $('bestTime').textContent = solves.length ? format(Math.min(...solves.map(x=>x.ms))) : '—';
+    $('ao5').textContent = average5();
+    $('history').innerHTML = '';
+    if (!solves.length) { $('history').innerHTML = '<div class="empty">Hələ solve yoxdur. İlk solve-unu et!</div>'; return; }
+    solves.slice(0,10).forEach((s,i) => {
+      const row = document.createElement('div'); row.className = 'solve';
+      const left = document.createElement('div'); const time = document.createElement('time'); time.textContent = '#' + (solves.length-i);
+      const detail = document.createElement('small'); detail.textContent = ' ' + new Date(s.date).toLocaleDateString();
+      left.append(time,detail); const value = document.createElement('strong'); value.textContent = format(s.ms); row.append(left,value); $('history').append(row);
+    });
+  }
+  function toast(msg) { const el=$('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1700); }
+  function beginHold() { if (mode === 'running') return; ready=false; $('timer').style.color='var(--accent2)'; holdTimer=setTimeout(()=>{ready=true;$('timer').style.color='var(--accent2)';$('timerHint').textContent='Hazırdır — burax və başla';},300); }
+  function endHold() { clearTimeout(holdTimer); if (mode === 'running') stop(); else if (ready) start(); ready=false; $('timer').style.color=''; }
+  $('newScramble').addEventListener('click', nextScramble);
+  $('copyScramble').addEventListener('click', async()=>{try{await navigator.clipboard.writeText($('scramble').textContent);toast('Scramble kopyalandı');}catch{toast('Kopyalama mümkün olmadı');}});
+  $('timerBtn').addEventListener('click',()=>{if(mode==='running')stop();else start();});
+  $('resetBtn').addEventListener('click',reset);
+  $('clearHistory').addEventListener('click',()=>{if(!solves.length)return;solves=[];save();renderHistory();toast('Nəticələr silindi');});
+  $('timer').addEventListener('pointerdown',e=>{e.preventDefault();beginHold();});
+  $('timer').addEventListener('pointerup',endHold);
+  $('timer').addEventListener('pointercancel',endHold);
+  document.addEventListener('keydown',e=>{
+    if(e.code!=='Space'||e.repeat||['SELECT','INPUT','TEXTAREA'].includes(document.activeElement.tagName))return;
+    e.preventDefault(); if(mode==='running')stop(); else beginHold();
+  });
+  document.addEventListener('keyup',e=>{if(e.code==='Space')endHold();});
+  window.addEventListener('blur',()=>{clearTimeout(holdTimer);ready=false;});
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('installBtn').hidden=false;});
+  $('installBtn').addEventListener('click',async()=>{
+    if(installPrompt){installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;}
+    else toast('Brauzer menyusundan “Add to Home Screen” seç');
+  });
+  if('serviceWorker' in navigator && location.protocol.startsWith('http')) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+  nextScramble(); renderHistory();
+})();
+</script>
+</body>
+</html>
